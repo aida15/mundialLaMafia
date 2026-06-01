@@ -4,7 +4,7 @@
    ============================================================ */
 
 const DATA_SRC = 'https://raw.githubusercontent.com/openfootball/worldcup.json/refs/heads/master/2026';
-const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR74F_g96qw11mu27i1PuAuavu9uDN-kmwQdsZw844w2yL2XtIHOiAvEm3AfZB2OTYIwPiNXyCn3hay/pub?output=csv';
+const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/1rIuQuoLMCylCGRq1UTLuuYJb1xe57e8bHNjmStnTA3I/pub?output=csv';
 const FORM_ID = '1ZeTJBB5A2-M3AXWx4rbA0hXDjeBwxee9xGrb4bUVl9E';
 const ENTRY_ID = 'entry.986161517';
 
