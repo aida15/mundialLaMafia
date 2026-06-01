@@ -1,12 +1,12 @@
-# ⚽ Quiniela Peña La Ventana — Mundial 2026
+# ⚽ Quiniela La Mafia — Mundial 2026
 
-La quiniela oficial de la **Peña La Ventana** para vivir el Mundial 2026 con un poco más de emoción, rivalidad sana y muchas conversaciones futboleras.
+La quiniela oficial de **La Mafia** para vivir el Mundial 2026 con un poco más de emoción, rivalidad sana y muchas conversaciones futboleras.
 
 ---
 
 ## ¿Qué es esto?
 
-Una aplicación web para que los socios de la Peña La Ventana puedan poner a prueba sus conocimientos futbolísticos pronosticando el desarrollo completo del Mundial 2026.
+Una aplicación web para que La Mafia pueda poner a prueba sus conocimientos futbolísticos pronosticando el desarrollo completo del Mundial 2026.
 
 No hay premios millonarios ni contratos con clubes de primera. Solo el prestigio de acertar más que los demás y el derecho a presumir durante todo el verano.
 
@@ -72,4 +72,4 @@ Sea cual sea tu estrategia, recuerda enviar tu pronóstico antes de que empiece 
 
 ---
 
-*Organizado por la Peña La Ventana para disfrutar juntos del Mundial 2026. Que gane el mejor... o el que tenga más suerte.*
+*Organizado para disfrutar juntos del Mundial 2026. Que gane el mejor... o el que tenga más suerte.*
