@@ -4,9 +4,9 @@
    ============================================================ */
 
 const DATA_SRC = 'https://raw.githubusercontent.com/openfootball/worldcup.json/refs/heads/master/2026';
-const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/1rIuQuoLMCylCGRq1UTLuuYJb1xe57e8bHNjmStnTA3I/pub?output=csv';
-const FORM_ID = '1ZeTJBB5A2-M3AXWx4rbA0hXDjeBwxee9xGrb4bUVl9E';
-const ENTRY_ID = 'entry.986161517';
+const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYV7LGPR8EsrRP1LJb0Z2ucv5gHJy2Gy9N4tHI3Dkv7As6Of22Wrrcd_d5JK2ExxRb6srJ7MXETaWp/pub?output=csv';
+const FORM_ID = '1k7lLI8XbQ29avl4V9dQYZ3mLgVzIhdFZjxqQ-QOn4_M';
+const ENTRY_ID = 'entry.2134460094';
 
 // Cierre de apuestas: 11 de junio de 2026, 19:00 hora peninsular española (CEST = UTC+2 → 17:00 UTC).
 const DEADLINE = new Date('2026-06-11T17:00:00Z');
