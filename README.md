@@ -33,6 +33,7 @@ No hay premios millonarios ni contratos con clubes de primera. Solo el prestigio
 | 1º de grupo | 4 |
 | 2º de grupo | 3 |
 | 3º de grupo | 2 |
+| 4º de grupo | 1 |
 | Mejor tercero clasificado (cada uno del top 8) | 1 |
 | Quiniela 1X2 (cada partido acertado) | 1 |
 
