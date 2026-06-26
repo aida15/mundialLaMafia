@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-06-26T02:57:17.842Z
+   Última actualización: 2026-06-26T06:56:58.747Z
    ============================================================ */
 
 const RESULTS = {
@@ -24,6 +24,12 @@ const RESULTS = {
       "Escocia",
       "Haití"
     ],
+    "D": [
+      "Estados Unidos",
+      "Australia",
+      "Paraguay",
+      "Turquía"
+    ],
     "E": [
       "Alemania",
       "Costa de Marfil",
@@ -41,6 +47,7 @@ const RESULTS = {
     "Suecia",
     "Ecuador",
     "Bosnia y Herzegovina",
+    "Paraguay",
     "Corea del Sur",
     "Escocia"
   ],
