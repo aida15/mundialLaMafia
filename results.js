@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-06-26T20:44:34.636Z
+   Última actualización: 2026-06-26T22:09:11.944Z
    ============================================================ */
 
 const RESULTS = {
@@ -41,6 +41,12 @@ const RESULTS = {
       "Japón",
       "Suecia",
       "Túnez"
+    ],
+    "I": [
+      "Francia",
+      "Noruega",
+      "Senegal",
+      "Irak"
     ]
   },
   "thirdPlace": [
@@ -48,6 +54,7 @@ const RESULTS = {
     "Ecuador",
     "Bosnia y Herzegovina",
     "Paraguay",
+    "Senegal",
     "Corea del Sur",
     "Escocia"
   ],
