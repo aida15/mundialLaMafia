@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-06-29T17:33:14.658Z
+   Última actualización: 2026-06-29T19:51:39.446Z
    ============================================================ */
 
 const RESULTS = {
@@ -96,7 +96,8 @@ const RESULTS = {
   },
   "knockout": {
     "round32": [
-      "Canadá"
+      "Canadá",
+      "Brasil"
     ],
     "round16": [],
     "quarterfinals": [],
@@ -114,6 +115,12 @@ const RESULTS = {
           "home": "Sudáfrica",
           "away": "Canadá",
           "winner": "Canadá"
+        },
+        {
+          "match": 537423,
+          "home": "Brasil",
+          "away": "Japón",
+          "winner": "Brasil"
         }
       ],
       "round16": [],
