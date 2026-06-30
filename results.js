@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-06-30T04:59:18.753Z
+   Última actualización: 2026-06-30T08:34:03.431Z
    ============================================================ */
 
 const RESULTS = {
@@ -97,7 +97,9 @@ const RESULTS = {
   "knockout": {
     "round32": [
       "Canadá",
-      "Brasil"
+      "Brasil",
+      "Paraguay",
+      "Marruecos"
     ],
     "round16": [],
     "quarterfinals": [],
@@ -126,13 +128,13 @@ const RESULTS = {
           "match": 537415,
           "home": "Alemania",
           "away": "Paraguay",
-          "winner": ""
+          "winner": "Paraguay"
         },
         {
           "match": 537418,
           "home": "Países Bajos",
           "away": "Marruecos",
-          "winner": ""
+          "winner": "Marruecos"
         }
       ],
       "round16": [],
