@@ -4,9 +4,9 @@
    ============================================================ */
 
 const DATA_SRC = 'https://raw.githubusercontent.com/openfootball/worldcup.json/refs/heads/master/2026';
-const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYV7LGPR8EsrRP1LJb0Z2ucv5gHJy2Gy9N4tHI3Dkv7As6Of22Wrrcd_d5JK2ExxRb6srJ7MXETaWp/pub?output=csv';
-const FORM_ID = '1FAIpQLScwV3OtZ-jRjW5m_dC44NFBnGgNCTzoA4HJWbzNTv_kWc6q9g';
-const ENTRY_ID = 'entry.2134460094';
+const LEADERBOARD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwtplM_3RIGPCdhcvoTaxtZroVzwplR7f16y4t-hUO6RDezlWd_0n6gcHiUEkveeJvHj813rySC6Fb/pub?output=csv';
+const FORM_ID = '1FAIpQLSc2se8Xj_Hx-1Q1SFHyypy487EPfnQ3wTbW2pDkcDGefHdS0w';
+const ENTRY_ID = 'entry.443364117';
 
 // Cierre de apuestas: 11 de junio de 2026, 19:00 hora peninsular española (CEST = UTC+2 → 17:00 UTC).
 const DEADLINE = new Date('2026-06-11T17:00:00Z');
@@ -3542,21 +3542,64 @@ function getKnockoutStageTeamSets(payload) {
     };
   }
 
-  const reviewState = buildKnockoutReviewState(payload);
-  const finalNum = KO_TREE.final?.[0]?.num;
-  const thirdNum = KO_TREE.thirdPlace?.[0]?.num;
-  const finalMatch = finalNum ? (reviewState.matchTeams?.[finalNum] || {}) : {};
-  const thirdWinner = thirdNum ? reviewState.knockoutResults?.[thirdNum] : getThirdPlaceWinnerFromPayload(payload);
-  const champion = finalNum ? reviewState.knockoutResults?.[finalNum] : getChampionFromPayload(payload);
+  // Lógica de puntuación KO:
+  // - round32: los 32 que llegan a dieciseisavos = 1º y 2º de cada grupo + 8 mejores terceros.
+  //   Siempre se calcula desde los grupos, tanto para RESULTS como para apuestas.
+  // - round16+: los que participan en esa ronda = ganadores de la ronda anterior.
+  //   Se lee del array simple ko.roundX (ganadores), o de los winners de ko.matches.prevRound.
+  //   Para apuestas: team1+team2 de ko.matches.round (los cruces que apostaron).
+
+  function koTeamsInRound(ko, round, groups, thirdPlace) {
+    const s = new Set();
+
+    if (round === 'round32') {
+      // Los 32 participantes = clasificados de grupos
+      if (groups) {
+        Object.values(groups).forEach(g => { if(g[0]) s.add(g[0]); if(g[1]) s.add(g[1]); });
+        (thirdPlace || []).slice(0, 8).forEach(t => t && s.add(t));
+      }
+      // Fallback si no hay grupos: matches
+      if (s.size === 0) {
+        ((ko.matches || {}).round32 || []).forEach(m => {
+          if(m.team1) s.add(m.team1); if(m.team2) s.add(m.team2);
+          if(m.home)  s.add(m.home);  if(m.away)  s.add(m.away);
+        });
+      }
+      return s;
+    }
+
+    // round16, quarterfinals, semifinals:
+    const prevRound = { round16:'round32', quarterfinals:'round16', semifinals:'quarterfinals' }[round];
+
+    // A: array simple de ganadores de la ronda anterior (RESULTS y apuestas legacy)
+    const prevWinners = (ko[prevRound] || []).filter(Boolean);
+    if (prevWinners.length) { prevWinners.forEach(t => s.add(t)); return s; }
+
+    // B: winners de matches de la ronda anterior (RESULTS con matches terminados)
+    ((ko.matches || {})[prevRound] || []).forEach(m => { if(m.winner) s.add(m.winner); });
+    if (s.size) return s;
+
+    // C: team1+team2 de matches de esta ronda (apuestas con formato matches)
+    ((ko.matches || {})[round] || []).forEach(m => {
+      if(m.team1) s.add(m.team1); if(m.team2) s.add(m.team2);
+      if(m.home)  s.add(m.home);  if(m.away)  s.add(m.away);
+    });
+    return s;
+  }
+
+  const ko = payload.knockout || {};
+  const finalists  = new Set(uniqueTeamList(getFinalistsFromPayload(payload)));
+  const champion   = getChampionFromPayload(payload);
+  const thirdWinner = getThirdPlaceWinnerFromPayload(payload);
 
   return {
-    round32: new Set(getTeamsFromReviewMatches(reviewState, KO_TREE.round32)),
-    round16: new Set(getTeamsFromReviewMatches(reviewState, KO_TREE.round16)),
-    quarterfinals: new Set(getTeamsFromReviewMatches(reviewState, KO_TREE.quarterfinals)),
-    semifinals: new Set(getTeamsFromReviewMatches(reviewState, KO_TREE.semifinals)),
-    finalist: new Set(uniqueTeamList([finalMatch.team1, finalMatch.team2, ...getFinalistsFromPayload(payload)])),
-    champion: new Set(champion ? [champion] : []),
-    thirdPlace: new Set(thirdWinner ? [thirdWinner] : [])
+    round32:       koTeamsInRound(ko, 'round32',       payload.groups, payload.thirdPlace),
+    round16:       koTeamsInRound(ko, 'round16',       null, null),
+    quarterfinals: koTeamsInRound(ko, 'quarterfinals', null, null),
+    semifinals:    koTeamsInRound(ko, 'semifinals',    null, null),
+    finalist:      finalists,
+    champion:      new Set(champion    ? [champion]    : []),
+    thirdPlace:    new Set(thirdWinner ? [thirdWinner] : [])
   };
 }
 
@@ -3810,7 +3853,6 @@ function openScoringHelpModal() {
             <li>Acertar el 1º del grupo: <strong>${puntuaciones.grupos.posicion.primero} pts</strong></li>
             <li>Acertar el 2º del grupo: <strong>${puntuaciones.grupos.posicion.segundo} pts</strong></li>
             <li>Acertar el 3º del grupo: <strong>${puntuaciones.grupos.posicion.tercero} pts</strong></li>
-			<li>Acertar el 4º del grupo: <strong>${puntuaciones.grupos.posicion.cuarto} pts</strong></li>
             <li>Cada mejor tercero (top 8) acertado: <strong>${puntuaciones.grupos.mejorTercero} pt</strong></li>
             <li>Quiniela 1X2 (3 partidos): <strong>${puntuaciones.quiniela1x2} pt por acierto</strong></li>
           </ul>
@@ -3879,6 +3921,14 @@ function openPrizesModal() {
             <li>🥈 2º clasificado: <strong>30% de la recaudación</strong></li>
             <li>🥉 3º clasificado: <strong>20% de la recaudación</strong></li>
           </ul>
+        </div>
+
+        <div class="scoring-help-card">
+          <h4>🤝 ¿Y si hay empate?</h4>
+          <ul>
+            <li>Los empatados se reparten <strong>a partes iguales</strong> la suma de los premios de las posiciones que ocupan.</li>
+          </ul>
+          <p class="scoring-help-small">Ejemplo: si dos personas empatan en lo más alto, ocupan el 1º y el 2º puesto, así que se reparten ese dinero entre las dos: (50% + 30%) ÷ 2 = <strong>40% cada una</strong>. El siguiente clasificado se lleva el 20% y el cuarto se queda sin premio.</p>
         </div>
       </div>
 
@@ -3963,22 +4013,25 @@ function renderPredictionReview(entry) {
     <div class="prediction-review">
       <h3>La predicción de ${entry.name} — ${entry.score} pts</h3>
 
-      <h4>Fase de grupos</h4>
+      <h4 class="group-modal-section-title"><span>🌍</span> FASE DE GRUPOS</h4>
       <div class="review-groups" id="reviewGroups"></div>
 
-      <h4>🎯 Quiniela 1X2</h4>
+      <h4 class="group-modal-section-title"><span>🎯</span> QUINIELA 1X2</h4>
       <div class="review-section" id="reviewQuiniela1x2"></div>
 
-      <h4>Knockout</h4>
+      <h4 class="group-modal-section-title"><span>🥉</span> MEJORES TERCEROS</h4>
+      <div class="review-section" id="reviewThirdPlace"></div>
+
       <div class="review-section" id="reviewKnockout"></div>
 
-      <h4>Logros individuales</h4>
+      <h4 class="group-modal-section-title"><span>⭐</span> LOGROS INDIVIDUALES</h4>
       <div class="review-section" id="reviewAwards"></div>
     </div>
   `;
 
   renderReviewGroups(entry.prediction, entry);
   renderReviewQuiniela1x2(entry.prediction);
+  renderReviewThirdPlace(entry.prediction);
   renderReviewKnockout(entry.prediction);
   renderReviewAwards(entry.prediction);
 }
@@ -4714,6 +4767,52 @@ function renderReviewQuiniela1x2(prediction) {
   });
 }
 
+function renderReviewThirdPlace(prediction) {
+  const container = document.getElementById('reviewThirdPlace');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const predTop8 = (prediction.thirdPlace || []).filter(Boolean).slice(0, 8);
+  const realTop8 = new Set((RESULTS.thirdPlace || []).filter(Boolean).slice(0, 8));
+  const resolved = realTop8.size > 0;
+
+  if (!resolved) {
+    container.innerHTML = '<p class="review-pending-note">Aún no hay mejores terceros confirmados.</p>';
+    return;
+  }
+
+  if (predTop8.length === 0) {
+    container.innerHTML = '<p class="review-pending-note">No apostó por ningún mejor tercero.</p>';
+    return;
+  }
+
+  const totalPoints = predTop8.reduce((sum, team) => sum + (realTop8.has(team) ? puntuaciones.grupos.mejorTercero : 0), 0);
+
+  const header = document.createElement('div');
+  header.className = 'quiniela1x2-review-row';
+  header.innerHTML = `<strong>Equipos apostados (top 8):</strong> ${renderReviewPointsBadge(totalPoints, 'Total puntos mejores terceros')}`;
+  container.appendChild(header);
+
+  predTop8.forEach((team, idx) => {
+    const correct = realTop8.has(team);
+    const points  = correct ? puntuaciones.grupos.mejorTercero : 0;
+
+    const row = document.createElement('div');
+    row.className = 'quiniela1x2-review-row' + (correct ? ' review-correct' : (resolved ? ' review-wrong' : ' review-pending'));
+    row.innerHTML = `
+      <div class="quiniela1x2-review-match">
+        <span class="position-badge">${idx + 1}</span>
+        <span class="team-flag ${getTeamFlagClass(team)}"></span>
+        <span class="team-name">${escapeHtml(team)}</span>
+      </div>
+      <div class="quiniela1x2-review-picks">
+        ${renderReviewPointsBadge(points, correct ? 'Acertado' : 'No clasificó entre los 8')}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
 function renderReviewAwards(prediction) {
   const container = document.getElementById('reviewAwards');
   container.className = 'awards-section';
@@ -4805,11 +4904,104 @@ function parseCSV(text) {
 // ---- Submit ----
 const FORM_ACTION = 'https://docs.google.com/forms/d/e/'+FORM_ID+'/formResponse';
 
+// Comprueba qué le falta a la apuesta antes de poder enviarla.
+// Devuelve un array de textos legibles (vacío => está todo completo).
+function getMissingSections() {
+  const missing = [];
+
+  ensureGroupsInitialized();
+  buildTPAllocation();
+  computeMatchTeams();
+
+  // 1) Fase de grupos: los 12 grupos confirmados
+  const unconfirmedGroups = GROUP_NAMES.filter(g => !isGroupComplete(g));
+  if (unconfirmedGroups.length > 0) {
+    missing.push('la fase de grupos (sin confirmar: ' +
+      unconfirmedGroups.map(g => 'Grupo ' + g).join(', ') + ')');
+  }
+
+  // 2) Mejores terceros: ranking confirmado
+  if (!state.thirdPlaceConfirmed) {
+    missing.push('los mejores terceros (ordénalos y pulsa "Confirmar ranking")');
+  }
+
+  // 3) Quiniela 1X2: los 3 partidos
+  const q = state.quiniela1x2 || {};
+  const quinielaPending = QUINIELA_1X2_MATCHES.filter(m => !q[m.key]).length;
+  if (quinielaPending > 0) {
+    missing.push('la quiniela 1X2 (faltan ' + quinielaPending + ' de ' +
+      QUINIELA_1X2_MATCHES.length + ' partidos)');
+  }
+
+  // 4) Eliminatoria: todos los cruces con ganador
+  const koRounds = [
+    { key: 'round32',       label: 'dieciseisavos' },
+    { key: 'round16',       label: 'octavos' },
+    { key: 'quarterfinals', label: 'cuartos' },
+    { key: 'semifinals',    label: 'semifinales' },
+    { key: 'final',         label: 'la final' },
+    { key: 'thirdPlace',    label: 'el 3.er puesto' }
+  ];
+  const koPending = koRounds
+    .filter(r => (KO_TREE[r.key] || []).some(m => !state.knockoutResults[m.num]))
+    .map(r => r.label);
+  if (koPending.length > 0) {
+    missing.push('la fase eliminatoria (faltan: ' + koPending.join(', ') + ')');
+  }
+
+  // 5) Premios: los 5
+  const awards = readAwards();
+  const awardsPending = AWARDS_CONFIG.filter(cfg => !awards[cfg.key]);
+  if (awardsPending.length > 0) {
+    missing.push('los premios (faltan: ' +
+      awardsPending.map(cfg => cfg.label).join(', ') + ')');
+  }
+
+  return missing;
+}
+
+// Aviso de apuesta incompleta, reutilizando el modal existente.
+function showIncompleteSubmissionModal(missing) {
+  const modal = document.getElementById('predictionModal');
+  const viewer = document.getElementById('predictionViewer');
+
+  if (!modal || !viewer) {
+    // Fallback por si el modal no estuviera disponible.
+    showToast('Te falta por rellenar: ' + missing.join('; ') +
+      '. Tu apuesta NO se ha enviado.', true);
+    return;
+  }
+
+  modal.style.display = 'flex';
+  viewer.innerHTML = `
+    <div class="scoring-help">
+      <h3>⚠️ Te falta algo por rellenar</h3>
+      <div class="scoring-help-card">
+        <p><strong>Te falta por rellenar:</strong></p>
+        <ul>
+          ${missing.map(item => '<li>' + escapeHtml(item) + '</li>').join('')}
+        </ul>
+      </div>
+      <p class="scoring-help-note">
+        Tu apuesta <strong>NO se ha enviado</strong>. Complétalo y vuelve a darle a
+        <strong>"¡A por la gloria!"</strong>.
+      </p>
+    </div>
+  `;
+}
+
 function submitPrediction() {
   if (isSubmissionClosed()) {
     showToast('El plazo se cerró el 11 de junio a las 19:00. Llegas tarde, sorry baby.', true);
     return;
   }
+
+  const missing = getMissingSections();
+  if (missing.length > 0) {
+    showIncompleteSubmissionModal(missing);
+    return;
+  }
+
   openNameModal();
 }
 
@@ -4830,6 +5022,14 @@ async function confirmSubmitPrediction() {
   if (isSubmissionClosed()) {
     showToast('El plazo ya está cerrado.', true);
     closeNameModal();
+    return;
+  }
+
+  // Segunda comprobación: no enviar si falta algo.
+  const missing = getMissingSections();
+  if (missing.length > 0) {
+    closeNameModal();
+    showIncompleteSubmissionModal(missing);
     return;
   }
 
@@ -4989,4 +5189,3 @@ document.addEventListener('keydown', e => {
 }
 
 document.addEventListener('DOMContentLoaded', init);
-	
