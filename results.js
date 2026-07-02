@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-07-01T23:10:54.763Z
+   Última actualización: 2026-07-02T02:52:57.203Z
    ============================================================ */
 
 const RESULTS = {
@@ -104,7 +104,8 @@ const RESULTS = {
       "Francia",
       "México",
       "Inglaterra",
-      "Bélgica"
+      "Bélgica",
+      "Estados Unidos"
     ],
     "round16": [],
     "quarterfinals": [],
@@ -170,6 +171,12 @@ const RESULTS = {
           "home": "Bélgica",
           "away": "Senegal",
           "winner": "Bélgica"
+        },
+        {
+          "match": 537421,
+          "home": "Estados Unidos",
+          "away": "Bosnia y Herzegovina",
+          "winner": "Estados Unidos"
         }
       ],
       "round16": [],
