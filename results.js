@@ -1,7 +1,7 @@
 /* ============================================================
    Resultados oficiales del Mundial 2026.
    Generado automáticamente por update-results.js
-   Última actualización: 2026-07-11T20:05:00.789Z
+   Última actualización: 2026-07-11T21:44:03.850Z
    ============================================================ */
 
 const RESULTS = {
@@ -117,7 +117,6 @@ const RESULTS = {
       "Marruecos",
       "Francia",
       "Noruega",
-      "Inglaterra",
       "España",
       "Bélgica",
       "Argentina",
@@ -251,12 +250,6 @@ const RESULTS = {
           "home": "Brasil",
           "away": "Noruega",
           "winner": "Noruega"
-        },
-        {
-          "match": 537378,
-          "home": "México",
-          "away": "Inglaterra",
-          "winner": "Inglaterra"
         },
         {
           "match": 537379,
